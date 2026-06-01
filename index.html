@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Firebase Project Suite</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+    <!-- App Shell -->
+    <main class="app-shell">
+
+        <!-- Auth Section -->
+        <section id="authSection" class="auth-section">
+            <div class="auth-card">
+                <p class="eyebrow-text">Firebase Project Suite</p>
+
+                <h1>Manage projects with your team.</h1>
+
+                <p class="auth-subtitle">
+                    A Firebase-powered project management app with roles, tasks, comments,
+                    notifications, and activity logs.
+                </p>
+
+                <div class="auth-tabs">
+                    <button id="showLoginBtn" class="auth-tab active">Login</button>
+                    <button id="showRegisterBtn" class="auth-tab">Register</button>
+                </div>
+
+                <form id="loginForm" class="auth-form">
+                    <input id="loginEmail" type="email" class="form-control" placeholder="Email address" required>
+
+                    <input id="loginPassword" type="password" class="form-control" placeholder="Password" required>
+
+                    <button type="submit" class="primary-btn">Login</button>
+                </form>
+
+                <form id="registerForm" class="auth-form d-none">
+                    <input id="registerName" type="text" class="form-control" placeholder="Full name" required>
+
+                    <input id="registerEmail" type="email" class="form-control" placeholder="Email address" required>
+
+                    <input id="registerPassword" type="password" class="form-control" placeholder="Password" required>
+
+                    <button type="submit" class="primary-btn">Create Account</button>
+                </form>
+
+                <p id="authMessage" class="auth-message"></p>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboardSection" class="dashboard-section d-none">
+
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow-text">Dashboard</p>
+                    <h2>Project Command Center</h2>
+                </div>
+
+                <div class="top-actions">
+                    <span id="currentUserName" class="user-pill">Loading...</span>
+                    <button id="logoutBtn" class="ghost-btn">Logout</button>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+
+                <aside class="side-panel">
+                    <form id="createProjectForm" class="project-form">
+                        <h3>Create Project</h3>
+
+                        <input id="projectTitle" type="text" class="form-control" placeholder="Project title" required>
+
+                        <textarea id="projectDescription" class="form-control" rows="3" placeholder="Project description"></textarea>
+
+                        <button type="submit" class="primary-btn w-100">+ New Project</button>
+
+                        <p id="projectMessage" class="small-message"></p>
+                    </form>
+
+                    <div class="panel-block">
+                        <h3>Your Projects</h3>
+
+                        <div id="projectList" class="project-list">
+                            <p class="empty-text">No projects loaded yet.</p>
+                        </div>
+                    </div>
+                </aside>
+
+                <section class="main-panel">
+                    <div id="activeProjectView" class="empty-state">
+                        <h3>Select or create a project</h3>
+                        <p>
+                            Your tasks, members, comments, notifications, and activity logs
+                            will appear here.
+                        </p>
+                    </div>
+                </section>
+
+                <aside class="activity-panel">
+                    <div class="panel-block">
+                        <h3>Assigned Tasks</h3>
+                        <div id="assignedTaskList">
+                            <p class="empty-text">No assigned tasks yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel-block">
+                        <h3>Notifications</h3>
+                        <div id="notificationList">
+                            <p class="empty-text">No notifications yet.</p>
+                        </div>
+                    </div>
+
+                    <div class="panel-block">
+                        <h3>Activity Log</h3>
+                        <div id="activityLogList" class="activity-log-list">
+                            <p class="empty-text">No activity selected.</p>
+                        </div>
+                    </div>
+                </aside>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App JS -->
+    <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>
