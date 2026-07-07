@@ -41,7 +41,7 @@ function renderAssignedTasks() {
             <div class="assigned-task-item">
                 <strong>${task.title}</strong>
                 <p>${task.projectTitle}</p>
-                <span>${task.status} · ${task.priority}</span>
+                <span>${task.status} / ${task.priority}</span>
             </div>
         `;
     }).join("");

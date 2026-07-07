@@ -1,306 +1,108 @@
-# Firebase Project Management Suite
+# Firebase Project Suite
 
-A real-time multi-user project management platform built with Firebase Authentication, Cloud Firestore, Bootstrap 5, and Vanilla JavaScript.
-
-Inspired by tools like Trello and Jira, this project demonstrates real-world concepts such as authentication, role-based access control, real-time collaboration, notifications, activity tracking, and project management workflows.
-
----
+A real-time project management web app built with Firebase Authentication, Cloud Firestore, and modular JavaScript.
 
 ## Live Demo
 
-🚀 https://fazal305.github.io/firebase-project-suite/
+https://fazal305.github.io/firebase-project-suite/
 
----
+## Project Overview
 
-## Screenshots
+Firebase Project Suite is a Trello/Jira-inspired collaboration dashboard for managing projects, team members, tasks, comments, notifications, and activity logs. It demonstrates how a frontend-only app can still support real-time multi-user workflows by using Firebase Authentication and Firestore listeners.
 
-Add screenshots here after deployment.
-
-### Login System
-
-![Login Screenshot](screenshots/login.png)
-
-### Dashboard
-
-![Dashboard Screenshot](screenshots/dashboard.png)
-
-### Task Board
-
-![Task Board Screenshot](screenshots/tasks.png)
-
-### Activity Log
-
-![Activity Log Screenshot](screenshots/activity-log.png)
-
----
+The app is designed as a portfolio project for practical Firebase development: authentication, role-based permissions, nested collections, live updates, task assignment, and collaboration history.
 
 ## Features
 
-### Authentication
-
-- User Registration
-- User Login
-- User Logout
-- Persistent Sessions
-- Firebase Authentication
-
----
-
-### Project Management
-
-- Create Projects
-- Edit Projects
-- Delete Projects
-- View All Assigned Projects
-- Real-Time Project Updates
-
----
-
-### Role-Based Access Control
-
-Each project has its own permission system.
-
-#### Owner
-
-- Create Projects
-- Edit Projects
-- Delete Projects
-- Invite Admins
-- Invite Members
-- Create Tasks
-- Edit Tasks
-- Delete Tasks
-- Full Project Control
-
-#### Admin
-
-- Invite Members
-- Create Tasks
-- Edit Tasks
-- Delete Tasks
-
-#### Member
-
-- View Project
-- Update Assigned Task Status
-- Edit Assigned Tasks
-- Add Comments
-
----
-
-### Team Management
-
-- Invite Users By Email
-- Assign Roles
-- Real-Time Member Updates
-- Project Member Directory
-
----
-
-### Task Management
-
-- Create Tasks
-- Assign Tasks To Members
-- Set Priorities
-- Set Deadlines
-- Edit Tasks
-- Delete Tasks
-- Update Task Status
-
-Workflow:
-
-```text
-To Do
- ↓
-In Progress
- ↓
-Review
- ↓
-Complete
-```
-
----
-
-### Real-Time Comments
-
-- Task Discussion Threads
-- Real-Time Comment Updates
-- Member Collaboration
-
-Firestore Path:
-
-```text
-projects
- └── projectId
-      └── tasks
-           └── taskId
-                └── comments
-```
-
----
-
-### Notifications
-
-- Task Assignment Notifications
-- Project Invitation Notifications
-- Mark As Read
-- Real-Time Updates
-
----
-
-### Activity Log
-
-Tracks:
-
-- Project Created
-- Project Updated
-- Member Invited
-- Task Created
-- Task Updated
-- Task Deleted
-- Task Status Changed
-- Comment Added
-
-Real-time activity feed for every project.
-
----
-
-### Assigned Tasks Dashboard
-
-Displays:
-
-- Tasks Assigned To Current User
-- Priority
-- Status
-- Project Name
-
-Across all projects.
-
----
+- Email/password registration and login
+- Persistent Firebase Authentication sessions
+- Create, view, edit, and delete projects
+- Project roles for owner, admin, and member users
+- Invite registered users by email
+- Real-time project member directory
+- Create tasks with assignees, priority, deadline, and status
+- Task workflow: To Do, In Progress, Review, Complete
+- Assigned tasks dashboard for the current user
+- Real-time task comments
+- Project activity log
+- Real-time notifications for invites and task assignments
+- Mark notifications as read
+- Responsive dashboard layout
 
 ## Tech Stack
 
-### Frontend
-
 - HTML5
 - CSS3
-- Vanilla JavaScript
-- Bootstrap 5
-
-### Backend
-
+- JavaScript modules
 - Firebase Authentication
 - Cloud Firestore
+- GitHub Pages
 
-### Realtime Features
+## Firebase Concepts Demonstrated
 
-- Firestore onSnapshot()
-- Real-Time Tasks
-- Real-Time Comments
-- Real-Time Notifications
-- Real-Time Activity Logs
-- Real-Time Project Updates
+- `onAuthStateChanged()` for session-aware UI
+- Firestore CRUD operations
+- `onSnapshot()` listeners for real-time updates
+- Subcollections for project members, tasks, comments, and activity
+- Role-based UI behavior
+- Query filters with `where()` and `orderBy()`
+- Notification and activity feed patterns
 
----
-
-## Firestore Data Structure
+## Firestore Structure
 
 ```text
-users
- └── userId
+users/
+|-- userId
 
-projects
- └── projectId
-      ├── members
-      │    └── memberId
-      │
-      ├── tasks
-      │    └── taskId
-      │         └── comments
-      │
-      └── activity
+projects/
+|-- projectId
+|   |-- members/
+|   |   |-- memberId
+|   |-- tasks/
+|   |   |-- taskId
+|   |       |-- comments/
+|   |           |-- commentId
+|   |-- activity/
+|       |-- activityId
 
-notifications
- └── notificationId
+notifications/
+|-- notificationId
 ```
-
----
 
 ## Project Structure
 
 ```text
 firebase-project-suite/
-│
-├── index.html
-├── README.md
-├── .gitignore
-│
-├── assets/
-│   │
-│   ├── css/
-│   │   └── style.css
-│   │
-│   └── js/
-│       │
-│       ├── firebase-config.js
-│       ├── auth.js
-│       ├── projects.js
-│       ├── comments.js
-│       ├── notifications.js
-│       ├── activity.js
-│       ├── tasks.js
-│       ├── ui.js
-│       └── app.js
-│
-└── firestore.rules
+|-- index.html
+|-- README.md
+|-- .gitignore
+|-- assets/
+|   |-- css/
+|   |   |-- style.css
+|   |-- js/
+|       |-- firebase-config.js
+|       |-- app.js
+|       |-- auth.js
+|       |-- projects.js
+|       |-- tasks.js
+|       |-- comments.js
+|       |-- notifications.js
+|       |-- activity.js
+|       |-- ui.js
 ```
 
----
+## Setup
 
-## Security
-
-Protected using Firestore Security Rules.
-
-Includes:
-
-- Authentication Checks
-- Project Membership Validation
-- Owner/Admin Permissions
-- Notification Ownership Protection
-- Activity Log Protection
-
----
-
-## Firebase Setup
-
-### Install Firebase
-
-```bash
-npm install firebase
-```
-
----
-
-### Create Firebase Project
-
-1. Open Firebase Console
-2. Create Project
-3. Enable Authentication
-4. Enable Email/Password Sign-In
-5. Create Firestore Database
-6. Copy Firebase Config
-
----
-
-### Add Firebase Config
-
-Inside:
+1. Create a Firebase project.
+2. Enable Email/Password Authentication.
+3. Create a Cloud Firestore database.
+4. Add your Firebase web app config inside:
 
 ```text
 assets/js/firebase-config.js
 ```
 
-Paste:
+Example:
 
 ```javascript
 const firebaseConfig = {
@@ -309,125 +111,51 @@ const firebaseConfig = {
   projectId: "...",
   storageBucket: "...",
   messagingSenderId: "...",
-  appId: "..."
+  appId: "...",
 };
 ```
 
----
+5. Open `index.html` locally or deploy through GitHub Pages.
 
-## Firestore Indexes
+## Firestore Index Notes
 
-Firebase may request indexes for:
+Firestore may request composite indexes for queries such as:
 
-### Projects
+- Projects filtered by `memberIds` and ordered by `createdAt`
+- Notifications filtered by `userId` and ordered by `createdAt`
 
-```text
-memberIds
-array-contains
+When Firebase shows an index error, open the provided Firebase link and create the suggested index.
 
-createdAt
-descending
-```
+## Portfolio Notes
 
-### Notifications
+This project highlights:
 
-```text
-userId
-ascending
-
-createdAt
-descending
-```
-
-When Firebase shows an index error:
-
-1. Click the provided link
-2. Create the index
-3. Wait for indexing to finish
-
----
-
-## Learning Outcomes
-
-This project demonstrates:
-
-- Firebase Authentication
-- Firestore CRUD
-- Real-Time Databases
-- Firestore Security Rules
-- Role-Based Access Control
-- Multi-User Applications
-- Real-Time Collaboration
-- Project Management Systems
-- Modular JavaScript Architecture
-
----
+- Real-time dashboard development
+- Firebase Authentication and Firestore integration
+- Modular JavaScript architecture
+- Multi-user role and permission logic
+- Task workflow UI
+- Collaboration features without a custom backend
 
 ## Future Improvements
 
-Planned Features:
-
-- Drag & Drop Task Board
-- Due Date Alerts
-- Task Labels
-- Task Filters
-- Search System
-- File Attachments
-- User Profiles
-- Project Settings
-- Project Archive
-- Dashboard Analytics
-- Dark / Light Theme Toggle
-- Firebase Hosting Deployment
-- Email Notifications
-
----
-
-## Deployment
-
-### GitHub Pages
-
-Repository:
-
-```text
-firebase-project-suite
-```
-
-Live URL:
-
-```text
-https://fazal305.github.io/firebase-project-suite/
-```
-
-### Firebase Hosting (Optional)
-
-```bash
-firebase login
-firebase init hosting
-firebase deploy
-```
-
----
+- Drag-and-drop task board
+- Project search and filters
+- User profile photos
+- Due-date alerts
+- Task labels
+- File attachments
+- Analytics dashboard
+- Firestore security rules documentation
+- Firebase Hosting deployment
 
 ## Author
 
-**Fazal Abbas**
+Fazal Abbas
 
-Software Engineering Student  
-Karachi, Pakistan
-
-GitHub:
-
-https://github.com/fazal305
-
-LinkedIn:
-
-https://www.linkedin.com/in/fazal-abbas-4653dg86
-
----
+- GitHub: https://github.com/fazal305
+- LinkedIn: https://www.linkedin.com/in/fazal-abbas-4653dg86
 
 ## License
 
 This project is licensed under the MIT License.
-
-See the LICENSE file for details.
