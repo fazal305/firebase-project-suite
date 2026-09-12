@@ -1,0 +1,120 @@
+rules_version = '2';
+
+// Firebase Project Suite — Firestore Security Rules
+//
+// Deployed via `firebase deploy --only firestore:rules --project fir-project-suite`.
+// This project previously had no rules file committed — role-based access was
+// only enforced in client JS (assets/js/*.js), which any authenticated user
+// could bypass with direct Firestore calls to read/write other users'
+// projects, tasks, or notifications. These rules enforce membership and
+// per-project roles server-side.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isProjectMember(projectId) {
+      return isSignedIn() &&
+        request.auth.uid in get(/databases/$(database)/documents/projects/$(projectId)).data.memberIds;
+    }
+
+    function ownMemberDocExists(projectId) {
+      return exists(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid));
+    }
+
+    function projectRole(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)/members/$(request.auth.uid)).data.role;
+    }
+
+    // Guarded with ownMemberDocExists() first: get() throws (denying the
+    // whole rule, not just this expression) if the member doc doesn't exist
+    // yet — which is exactly the case for the project owner's own bootstrap
+    // write, handled separately below.
+    function isProjectAdmin(projectId) {
+      return isProjectMember(projectId) &&
+        ownMemberDocExists(projectId) &&
+        projectRole(projectId) in ["owner", "admin"];
+    }
+
+    // users/{uid} — profile. Any signed-in user can read (needed to look up
+    // teammates by email when inviting), but only the owner can write it,
+    // and there is no global "role" field here to protect (roles are
+    // per-project, under projects/{id}/members).
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSelf(userId);
+      allow delete: if false;
+    }
+
+    // projects/{projectId} — readable/writable only by members. Creation
+    // requires the creator to be the sole initial member and owner, matching
+    // createProject() in projects.js.
+    match /projects/{projectId} {
+      // Checked against resource.data directly (not the isProjectMember()
+      // helper, which get()s this same document) — a list query's rule
+      // can't self-referentially get() the document already being listed.
+      allow read: if isSignedIn() && request.auth.uid in resource.data.memberIds;
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerId == request.auth.uid &&
+        request.resource.data.memberIds == [request.auth.uid];
+      allow update: if isProjectAdmin(projectId);
+      allow delete: if isProjectMember(projectId) &&
+        resource.data.ownerId == request.auth.uid;
+
+      // members/{uid} — role: "owner" | "admin" | "member". Only an existing
+      // admin/owner can add or change a member's role, EXCEPT the one-time
+      // bootstrap case: the project's owner creating their own "owner"
+      // member doc right after creating the project, before any member doc
+      // exists yet (see createProject() in projects.js).
+      match /members/{memberId} {
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectAdmin(projectId) ||
+          (isSelf(memberId) &&
+            get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid &&
+            request.resource.data.role == "owner");
+        allow update, delete: if isProjectAdmin(projectId);
+      }
+
+      // tasks/{taskId} — any member can read/create/update tasks.
+      match /tasks/{taskId} {
+        allow read: if isProjectMember(projectId);
+        allow create, update: if isProjectMember(projectId);
+        allow delete: if isProjectAdmin(projectId);
+
+        // comments/{commentId} — any member can read/comment; only the
+        // comment's author (or a project admin) can remove it.
+        match /comments/{commentId} {
+          allow read: if isProjectMember(projectId);
+          allow create: if isProjectMember(projectId) &&
+            request.resource.data.createdBy == request.auth.uid;
+          allow update: if false;
+          allow delete: if isProjectMember(projectId) &&
+            (resource.data.createdBy == request.auth.uid || isProjectAdmin(projectId));
+        }
+      }
+
+      // activity/{entryId} — append-only log, readable by members.
+      match /activity/{entryId} {
+        allow read: if isProjectMember(projectId);
+        allow create: if isProjectMember(projectId);
+        allow update, delete: if false;
+      }
+    }
+
+    // notifications/{id} — recipient-scoped via "userId". Any signed-in user
+    // can create one (e.g. inviting/assigning a teammate creates a
+    // notification for someone else), but only the recipient can read,
+    // mark-read, or delete their own notifications.
+    match /notifications/{notificationId} {
+      allow read, update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.userId is string;
+    }
+  }
+}
