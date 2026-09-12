@@ -23,6 +23,10 @@ import {
 } from "./firebase-config.js";
 
 import {
+    handleAuthError
+} from "./auth.js";
+
+import {
     addTaskComment,
     watchTaskComments,
     clearCommentListeners
@@ -148,7 +152,9 @@ async function createProject(event) {
 
         showProjectMessage("Project created.");
     } catch (error) {
-        showProjectMessage(error.message);
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
     }
 }
 
@@ -173,19 +179,25 @@ async function updateProject(projectId) {
     const currentUser = auth.currentUser;
     const projectRef = doc(db, "projects", projectId);
 
-    await updateDoc(projectRef, {
-        title: newTitle.trim(),
-        description: newDescription?.trim() || "",
-        updatedAt: serverTimestamp()
-    });
+    try {
+        await updateDoc(projectRef, {
+            title: newTitle.trim(),
+            description: newDescription?.trim() || "",
+            updatedAt: serverTimestamp()
+        });
 
-    await addDoc(collection(db, "projects", projectId, "activity"), {
-        type: "project_updated",
-        message: `${currentUser.email} updated the project.`,
-        userId: currentUser.uid,
-        userName: currentUser.email,
-        createdAt: serverTimestamp()
-    });
+        await addDoc(collection(db, "projects", projectId, "activity"), {
+            type: "project_updated",
+            message: `${currentUser.email} updated the project.`,
+            userId: currentUser.uid,
+            userName: currentUser.email,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
+    }
 }
 
 
@@ -205,7 +217,14 @@ async function deleteProject(projectId) {
         return;
     }
 
-    await deleteDoc(doc(db, "projects", projectId));
+    try {
+        await deleteDoc(doc(db, "projects", projectId));
+    } catch (error) {
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
+        return;
+    }
 
     activeProjectId = null;
 
@@ -309,7 +328,9 @@ async function inviteMember(event, projectId) {
         inviteEmailInput.value = "";
         inviteMessage.textContent = "Member invited successfully.";
     } catch (error) {
-        inviteMessage.textContent = error.message;
+        if (!handleAuthError(error)) {
+            inviteMessage.textContent = error.message;
+        }
     }
 }
 
@@ -390,7 +411,9 @@ async function createTask(event, projectId) {
 
         taskMessage.textContent = "Task created.";
     } catch (error) {
-        taskMessage.textContent = error.message;
+        if (!handleAuthError(error)) {
+            taskMessage.textContent = error.message;
+        }
     }
 }
 
@@ -413,19 +436,25 @@ async function updateTaskStatus(projectId, taskId, taskData, newStatus) {
         return;
     }
 
-    await updateDoc(doc(db, "projects", projectId, "tasks", taskId), {
-        status: newStatus,
-        isComplete: newStatus === "complete",
-        updatedAt: serverTimestamp()
-    });
+    try {
+        await updateDoc(doc(db, "projects", projectId, "tasks", taskId), {
+            status: newStatus,
+            isComplete: newStatus === "complete",
+            updatedAt: serverTimestamp()
+        });
 
-    await addDoc(collection(db, "projects", projectId, "activity"), {
-        type: "task_status_updated",
-        message: `${currentUser.email} moved task "${taskData.title}" to ${newStatus}.`,
-        userId: currentUser.uid,
-        userName: currentUser.email,
-        createdAt: serverTimestamp()
-    });
+        await addDoc(collection(db, "projects", projectId, "activity"), {
+            type: "task_status_updated",
+            message: `${currentUser.email} moved task "${taskData.title}" to ${newStatus}.`,
+            userId: currentUser.uid,
+            userName: currentUser.email,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
+    }
 }
 
 
@@ -465,21 +494,27 @@ async function editTask(projectId, taskId, taskData) {
         }
     }
 
-    await updateDoc(doc(db, "projects", projectId, "tasks", taskId), {
-        title: newTitle.trim(),
-        description: newDescription?.trim() || "",
-        deadline: newDeadline?.trim() || "",
-        priority: newPriority,
-        updatedAt: serverTimestamp()
-    });
+    try {
+        await updateDoc(doc(db, "projects", projectId, "tasks", taskId), {
+            title: newTitle.trim(),
+            description: newDescription?.trim() || "",
+            deadline: newDeadline?.trim() || "",
+            priority: newPriority,
+            updatedAt: serverTimestamp()
+        });
 
-    await addDoc(collection(db, "projects", projectId, "activity"), {
-        type: "task_updated",
-        message: `${currentUser.email} edited task "${newTitle.trim()}".`,
-        userId: currentUser.uid,
-        userName: currentUser.email,
-        createdAt: serverTimestamp()
-    });
+        await addDoc(collection(db, "projects", projectId, "activity"), {
+            type: "task_updated",
+            message: `${currentUser.email} edited task "${newTitle.trim()}".`,
+            userId: currentUser.uid,
+            userName: currentUser.email,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
+    }
 }
 
 
@@ -506,15 +541,21 @@ async function deleteTask(projectId, taskId, taskData) {
         return;
     }
 
-    await deleteDoc(doc(db, "projects", projectId, "tasks", taskId));
+    try {
+        await deleteDoc(doc(db, "projects", projectId, "tasks", taskId));
 
-    await addDoc(collection(db, "projects", projectId, "activity"), {
-        type: "task_deleted",
-        message: `${currentUser.email} deleted task "${taskData.title}".`,
-        userId: currentUser.uid,
-        userName: currentUser.email,
-        createdAt: serverTimestamp()
-    });
+        await addDoc(collection(db, "projects", projectId, "activity"), {
+            type: "task_deleted",
+            message: `${currentUser.email} deleted task "${taskData.title}".`,
+            userId: currentUser.uid,
+            userName: currentUser.email,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        if (!handleAuthError(error)) {
+            showProjectMessage(error.message);
+        }
+    }
 }
 
 

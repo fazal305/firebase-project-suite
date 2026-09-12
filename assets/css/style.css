@@ -289,6 +289,18 @@ textarea.form-control {
   color: #6d8198;
 }
 
+.field-error {
+  display: block;
+  min-height: 18px;
+  margin-top: 4px;
+  color: var(--warning);
+  font-size: 0.8rem;
+}
+
+.form-control.field-invalid {
+  border-color: var(--warning);
+}
+
 .auth-message,
 .small-message {
   min-height: 22px;

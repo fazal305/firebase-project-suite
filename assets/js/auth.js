@@ -43,6 +43,124 @@ function showAuthMessage(message) {
 }
 
 
+/* FIELD-LEVEL VALIDATION HELPERS */
+
+function getFieldErrorElement(inputEl) {
+    let errorEl = inputEl.parentElement.querySelector(".field-error");
+
+    if (!errorEl) {
+        errorEl = document.createElement("span");
+        errorEl.className = "field-error";
+        inputEl.parentElement.appendChild(errorEl);
+    }
+
+    return errorEl;
+}
+
+function showFieldError(inputEl, message) {
+    const errorEl = getFieldErrorElement(inputEl);
+    errorEl.textContent = message;
+    inputEl.classList.add("field-invalid");
+}
+
+function clearFieldError(inputEl) {
+    const errorEl = inputEl.parentElement.querySelector(".field-error");
+
+    if (errorEl) {
+        errorEl.textContent = "";
+    }
+
+    inputEl.classList.remove("field-invalid");
+}
+
+function clearFormFieldErrors(formEl) {
+    formEl.querySelectorAll(".field-error").forEach(function (errorEl) {
+        errorEl.textContent = "";
+    });
+
+    formEl.querySelectorAll(".field-invalid").forEach(function (inputEl) {
+        inputEl.classList.remove("field-invalid");
+    });
+}
+
+
+/* VALIDATE LOGIN FORM */
+
+function validateLoginForm(emailInput, passwordInput) {
+    let isValid = true;
+
+    if (!emailInput.value.trim()) {
+        showFieldError(emailInput, "Email is required.");
+        isValid = false;
+    }
+
+    if (!passwordInput.value.trim()) {
+        showFieldError(passwordInput, "Password is required.");
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+
+/* VALIDATE REGISTER FORM */
+
+function validateRegisterForm(nameInput, emailInput, passwordInput) {
+    let isValid = true;
+
+    if (!nameInput.value.trim()) {
+        showFieldError(nameInput, "Full name is required.");
+        isValid = false;
+    }
+
+    if (!emailInput.value.trim()) {
+        showFieldError(emailInput, "Email is required.");
+        isValid = false;
+    }
+
+    if (!passwordInput.value.trim()) {
+        showFieldError(passwordInput, "Password is required.");
+        isValid = false;
+    } else if (passwordInput.value.trim().length < 6) {
+        showFieldError(passwordInput, "Password must be at least 6 characters.");
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+
+/* SESSION EXPIRY HANDLING */
+
+const SESSION_EXPIRED_ERROR_CODES = [
+    "auth/user-token-expired",
+    "auth/requires-recent-login"
+];
+
+function isSessionExpiredError(error) {
+    return Boolean(error) && SESSION_EXPIRED_ERROR_CODES.includes(error.code);
+}
+
+async function handleSessionExpiry() {
+    showAuthMessage("Your session has expired — please log in again.");
+
+    try {
+        await signOut(auth);
+    } catch (signOutError) {
+        // Ignore: the user is being redirected to login regardless.
+    }
+}
+
+function handleAuthError(error) {
+    if (isSessionExpiredError(error)) {
+        handleSessionExpiry();
+        return true;
+    }
+
+    return false;
+}
+
+
 /* SHOW LOGIN FORM */
 
 function showLoginForm() {
@@ -53,6 +171,7 @@ function showLoginForm() {
     showRegisterBtn.classList.remove("active");
 
     showAuthMessage("");
+    clearFormFieldErrors(loginForm);
 }
 
 
@@ -66,6 +185,7 @@ function showRegisterForm() {
     showLoginBtn.classList.remove("active");
 
     showAuthMessage("");
+    clearFormFieldErrors(registerForm);
 }
 
 
@@ -117,9 +237,19 @@ async function getUserProfile(userId) {
 async function registerUser(event) {
     event.preventDefault();
 
-    const fullName = document.querySelector("#registerName").value.trim();
-    const email = document.querySelector("#registerEmail").value.trim();
-    const password = document.querySelector("#registerPassword").value.trim();
+    const nameInput = document.querySelector("#registerName");
+    const emailInput = document.querySelector("#registerEmail");
+    const passwordInput = document.querySelector("#registerPassword");
+
+    clearFormFieldErrors(registerForm);
+
+    if (!validateRegisterForm(nameInput, emailInput, passwordInput)) {
+        return;
+    }
+
+    const fullName = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
     try {
         showAuthMessage("Creating your account...");
@@ -132,7 +262,9 @@ async function registerUser(event) {
 
         showAuthMessage("Account created successfully.");
     } catch (error) {
-        showAuthMessage(error.message);
+        if (!handleAuthError(error)) {
+            showAuthMessage(error.message);
+        }
     }
 }
 
@@ -142,8 +274,17 @@ async function registerUser(event) {
 async function loginUser(event) {
     event.preventDefault();
 
-    const email = document.querySelector("#loginEmail").value.trim();
-    const password = document.querySelector("#loginPassword").value.trim();
+    const emailInput = document.querySelector("#loginEmail");
+    const passwordInput = document.querySelector("#loginPassword");
+
+    clearFormFieldErrors(loginForm);
+
+    if (!validateLoginForm(emailInput, passwordInput)) {
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
     try {
         showAuthMessage("Logging in...");
@@ -154,7 +295,9 @@ async function loginUser(event) {
 
         showAuthMessage("");
     } catch (error) {
-        showAuthMessage(error.message);
+        if (!handleAuthError(error)) {
+            showAuthMessage(error.message);
+        }
     }
 }
 
@@ -204,5 +347,7 @@ function setupAuthEvents() {
 
 export {
     setupAuthEvents,
-    watchAuthState
+    watchAuthState,
+    handleAuthError,
+    isSessionExpiredError
 };
