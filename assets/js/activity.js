@@ -12,6 +12,10 @@ import {
     db
 } from "./firebase-config.js";
 
+import {
+    escapeHtml
+} from "./ui.js";
+
 
 /* ACTIVITY LISTENER */
 
@@ -42,8 +46,8 @@ function renderActivityLog(activities) {
     activityLogList.innerHTML = activities.map(function (activity) {
         return `
             <div class="activity-item">
-                <span>${formatActivityType(activity.type)}</span>
-                <p>${activity.message}</p>
+                <span>${escapeHtml(formatActivityType(activity.type))}</span>
+                <p>${escapeHtml(activity.message)}</p>
             </div>
         `;
     }).join("");

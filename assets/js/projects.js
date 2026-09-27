@@ -37,6 +37,10 @@ import {
     clearActivityLog
 } from "./activity.js";
 
+import {
+    escapeHtml
+} from "./ui.js";
+
 /* PROJECT UI ELEMENTS */
 
 const createProjectForm = document.querySelector("#createProjectForm");
@@ -610,8 +614,8 @@ function renderMembersList(members) {
         return `
             <div class="member-card">
                 <div>
-                    <strong>${member.fullName || member.email}</strong>
-                    <p>${member.email}</p>
+                    <strong>${escapeHtml(member.fullName || member.email)}</strong>
+                    <p>${escapeHtml(member.email)}</p>
                 </div>
 
                 ${renderRoleBadge(member.role)}
@@ -634,8 +638,8 @@ function renderTaskAssigneeOptions(members) {
 
     taskAssigneeSelect.innerHTML = members.map(function (member) {
         return `
-            <option value="${member.uid}">
-                ${member.fullName || member.email}
+            <option value="${escapeHtml(member.uid)}">
+                ${escapeHtml(member.fullName || member.email)}
             </option>
         `;
     }).join("");
@@ -712,15 +716,15 @@ function renderTaskCard(task) {
     return `
         <article class="task-card" data-task-id="${task.id}">
             <div class="task-card-header">
-                <h5>${task.title}</h5>
+                <h5>${escapeHtml(task.title)}</h5>
                 ${renderPriorityBadge(task.priority)}
             </div>
 
-            <p>${task.description || "No description."}</p>
+            <p>${escapeHtml(task.description) || "No description."}</p>
 
             <div class="task-meta">
-                <span>Assigned: ${task.assignedToName || task.assignedToEmail}</span>
-                <span>Deadline: ${task.deadline || "No deadline"}</span>
+                <span>Assigned: ${escapeHtml(task.assignedToName || task.assignedToEmail)}</span>
+                <span>Deadline: ${escapeHtml(task.deadline) || "No deadline"}</span>
             </div>
 
             ${renderStatusSelect(task)}
@@ -900,8 +904,8 @@ function renderProjectCard(projectId, projectData) {
     projectCard.type = "button";
 
     projectCard.innerHTML = `
-        <span class="project-card-title">${projectData.title}</span>
-        <span class="project-card-meta">${projectData.description || "No description yet"}</span>
+        <span class="project-card-title">${escapeHtml(projectData.title)}</span>
+        <span class="project-card-meta">${escapeHtml(projectData.description) || "No description yet"}</span>
     `;
 
     projectCard.addEventListener("click", function () {
@@ -929,12 +933,12 @@ async function renderActiveProject(projectId, projectData) {
     activeProjectView.innerHTML = `
         <div class="project-hero">
             <p class="eyebrow-text">Active Project</p>
-            <h3>${projectData.title}</h3>
-            <p>${projectData.description || "No project description yet."}</p>
+            <h3>${escapeHtml(projectData.title)}</h3>
+            <p>${escapeHtml(projectData.description) || "No project description yet."}</p>
 
             <div class="project-meta-row">
-                <span class="project-id-pill">Role: ${role || "unknown"}</span>
-                <span class="project-id-pill">ID: ${projectId}</span>
+                <span class="project-id-pill">Role: ${escapeHtml(role || "unknown")}</span>
+                <span class="project-id-pill">ID: ${escapeHtml(projectId)}</span>
             </div>
 
             ${canManageProject ? `

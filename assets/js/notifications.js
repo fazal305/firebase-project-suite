@@ -14,6 +14,10 @@ import {
     db
 } from "./firebase-config.js";
 
+import {
+    escapeHtml
+} from "./ui.js";
+
 
 /* NOTIFICATION LISTENER */
 
@@ -46,8 +50,8 @@ function renderNotifications(notifications) {
     notificationList.innerHTML = notifications.map(function (notification) {
         return `
             <div class="notification-item ${notification.isRead ? "read-notification" : "unread-notification"}">
-                <span>${notification.title}</span>
-                <p>${notification.message}</p>
+                <span>${escapeHtml(notification.title)}</span>
+                <p>${escapeHtml(notification.message)}</p>
 
                 ${notification.isRead ? "" : `
                     <button class="ghost-btn mark-read-btn" data-notification-id="${notification.id}">

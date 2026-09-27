@@ -12,6 +12,10 @@ import {
     db
 } from "./firebase-config.js";
 
+import {
+    escapeHtml
+} from "./ui.js";
+
 
 /* ASSIGNED TASK STATE */
 
@@ -39,9 +43,9 @@ function renderAssignedTasks() {
     assignedTaskList.innerHTML = allAssignedTasks.map(function (task) {
         return `
             <div class="assigned-task-item">
-                <strong>${task.title}</strong>
-                <p>${task.projectTitle}</p>
-                <span>${task.status} / ${task.priority}</span>
+                <strong>${escapeHtml(task.title)}</strong>
+                <p>${escapeHtml(task.projectTitle)}</p>
+                <span>${escapeHtml(task.status)} / ${escapeHtml(task.priority)}</span>
             </div>
         `;
     }).join("");

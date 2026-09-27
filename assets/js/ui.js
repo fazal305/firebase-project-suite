@@ -41,10 +41,29 @@ function showToastMessage(message) {
 }
 
 
+/* ESCAPE HTML */
+/* Untrusted text (project/task titles, comments, member names, activity
+   messages, etc. all come from other users' Firestore documents) must be
+   escaped before it is interpolated into an innerHTML template. */
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function (character) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#39;"
+        }[character];
+    });
+}
+
+
 export {
     showElement,
     hideElement,
     setElementText,
     clearElement,
-    showToastMessage
+    showToastMessage,
+    escapeHtml
 };

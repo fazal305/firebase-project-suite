@@ -14,6 +14,10 @@ import {
     db
 } from "./firebase-config.js";
 
+import {
+    escapeHtml
+} from "./ui.js";
+
 
 /* COMMENT LISTENERS */
 
@@ -74,8 +78,8 @@ function renderComments(taskId, comments) {
     commentList.innerHTML = comments.map(function (comment) {
         return `
             <div class="comment-item">
-                <strong>${comment.createdByEmail}</strong>
-                <p>${comment.text}</p>
+                <strong>${escapeHtml(comment.createdByEmail)}</strong>
+                <p>${escapeHtml(comment.text)}</p>
             </div>
         `;
     }).join("");
