@@ -1,21 +1,16 @@
 /* ASSIGNED TASK IMPORTS */
 
 import {
-    collection,
-    query,
-    where,
-    orderBy,
-    onSnapshot
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-import {
-    db
-} from "./firebase-config.js";
+import { db } from "./firebase-config.js";
 
-import {
-    escapeHtml
-} from "./ui.js";
-
+import { escapeHtml } from "./ui.js";
 
 /* ASSIGNED TASK STATE */
 
@@ -23,123 +18,122 @@ let unsubscribeAssignedProjects = null;
 let assignedTaskListeners = [];
 let assignedTasksByProject = {};
 
-
 /* RENDER ASSIGNED TASKS */
 
 function renderAssignedTasks() {
-    const assignedTaskList = document.querySelector("#assignedTaskList");
+  const assignedTaskList = document.querySelector("#assignedTaskList");
 
-    if (!assignedTaskList) {
-        return;
-    }
+  if (!assignedTaskList) {
+    return;
+  }
 
-    const allAssignedTasks = Object.values(assignedTasksByProject).flat();
+  const allAssignedTasks = Object.values(assignedTasksByProject).flat();
 
-    if (allAssignedTasks.length === 0) {
-        assignedTaskList.innerHTML = `<p class="empty-text">No assigned tasks yet.</p>`;
-        return;
-    }
+  if (allAssignedTasks.length === 0) {
+    assignedTaskList.innerHTML = `<p class="empty-text">No assigned tasks yet.</p>`;
+    return;
+  }
 
-    assignedTaskList.innerHTML = allAssignedTasks.map(function (task) {
-        return `
+  assignedTaskList.innerHTML = allAssignedTasks
+    .map(function (task) {
+      return `
             <div class="assigned-task-item">
                 <strong>${escapeHtml(task.title)}</strong>
                 <p>${escapeHtml(task.projectTitle)}</p>
                 <span>${escapeHtml(task.status)} / ${escapeHtml(task.priority)}</span>
             </div>
         `;
-    }).join("");
+    })
+    .join("");
 }
-
 
 /* CLEAR TASK SUB-LISTENERS */
 
 function clearTaskSubListeners() {
-    assignedTaskListeners.forEach(function (unsubscribeTaskListener) {
-        unsubscribeTaskListener();
-    });
+  assignedTaskListeners.forEach(function (unsubscribeTaskListener) {
+    unsubscribeTaskListener();
+  });
 
-    assignedTaskListeners = [];
-    assignedTasksByProject = {};
+  assignedTaskListeners = [];
+  assignedTasksByProject = {};
 }
-
 
 /* CLEAR ALL ASSIGNED LISTENERS */
 
 function clearAssignedTaskListeners() {
-    clearTaskSubListeners();
+  clearTaskSubListeners();
 
-    if (unsubscribeAssignedProjects) {
-        unsubscribeAssignedProjects();
-        unsubscribeAssignedProjects = null;
-    }
+  if (unsubscribeAssignedProjects) {
+    unsubscribeAssignedProjects();
+    unsubscribeAssignedProjects = null;
+  }
 }
-
 
 /* WATCH ASSIGNED TASKS */
 
 function watchAssignedTasks(userId) {
-    clearAssignedTaskListeners();
+  clearAssignedTaskListeners();
 
-    const projectsQuery = query(
-        collection(db, "projects"),
-        where("memberIds", "array-contains", userId),
-        orderBy("createdAt", "desc")
-    );
+  const projectsQuery = query(
+    collection(db, "projects"),
+    where("memberIds", "array-contains", userId),
+    orderBy("createdAt", "desc"),
+  );
 
-    unsubscribeAssignedProjects = onSnapshot(projectsQuery, function (projectSnapshot) {
-        clearTaskSubListeners();
+  unsubscribeAssignedProjects = onSnapshot(
+    projectsQuery,
+    function (projectSnapshot) {
+      clearTaskSubListeners();
 
-        if (projectSnapshot.empty) {
-            renderAssignedTasks();
-            return;
-        }
+      if (projectSnapshot.empty) {
+        renderAssignedTasks();
+        return;
+      }
 
-        projectSnapshot.forEach(function (projectDocument) {
-            const projectData = projectDocument.data();
+      projectSnapshot.forEach(function (projectDocument) {
+        const projectData = projectDocument.data();
 
-            const tasksQuery = query(
-                collection(db, "projects", projectDocument.id, "tasks"),
-                where("assignedTo", "==", userId)
-            );
+        const tasksQuery = query(
+          collection(db, "projects", projectDocument.id, "tasks"),
+          where("assignedTo", "==", userId),
+        );
 
-            const unsubscribeTaskListener = onSnapshot(tasksQuery, function (taskSnapshot) {
-                const projectTasks = [];
+        const unsubscribeTaskListener = onSnapshot(
+          tasksQuery,
+          function (taskSnapshot) {
+            const projectTasks = [];
 
-                taskSnapshot.forEach(function (taskDocument) {
-                    projectTasks.push({
-                        id: taskDocument.id,
-                        projectId: projectDocument.id,
-                        projectTitle: projectData.title,
-                        ...taskDocument.data()
-                    });
-                });
-
-                assignedTasksByProject[projectDocument.id] = projectTasks;
-
-                renderAssignedTasks();
+            taskSnapshot.forEach(function (taskDocument) {
+              projectTasks.push({
+                id: taskDocument.id,
+                projectId: projectDocument.id,
+                projectTitle: projectData.title,
+                ...taskDocument.data(),
+              });
             });
 
-            assignedTaskListeners.push(unsubscribeTaskListener);
-        });
-    });
-}
+            assignedTasksByProject[projectDocument.id] = projectTasks;
 
+            renderAssignedTasks();
+          },
+        );
+
+        assignedTaskListeners.push(unsubscribeTaskListener);
+      });
+    },
+  );
+}
 
 /* CLEAR ASSIGNED TASKS */
 
 function clearAssignedTasks() {
-    clearAssignedTaskListeners();
+  clearAssignedTaskListeners();
 
-    const assignedTaskList = document.querySelector("#assignedTaskList");
+  const assignedTaskList = document.querySelector("#assignedTaskList");
 
-    if (assignedTaskList) {
-        assignedTaskList.innerHTML = `<p class="empty-text">No assigned tasks yet.</p>`;
-    }
+  if (assignedTaskList) {
+    assignedTaskList.innerHTML = `<p class="empty-text">No assigned tasks yet.</p>`;
+  }
 }
 
-
-export {
-    watchAssignedTasks,
-    clearAssignedTasks
-};
+export { watchAssignedTasks, clearAssignedTasks };
